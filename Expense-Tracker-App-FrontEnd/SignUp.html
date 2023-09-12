@@ -52,6 +52,11 @@
                       <a href="#!" class="text-white"><i class="fa fa-twitter fa-lg mx-4 px-2"></i></a>
                       <a href="#!" class="text-white"><i class="fa fa-google fa-lg"></i></a>
                     </div>
+
+                    <div>
+                      <p class="mb-0">Already an existing User?<a href="./login.html" class="text-white-50 fw-bold">Login</a>
+                      </p>
+                    </div>
       
                   </div>
       
@@ -79,18 +84,22 @@
             password:password
           }
           const result = await axios.post('http://localhost:3000/user/signUp',userObj);
+          form.reset()
           if (result.status==200){
             location.replace("./login.html")
           }
-          
          
         }
         catch(err){
-          alert('Maybe user email id already exists')
-          console.log(err);
+          if(err.response.data.msg=="user email id already exists"){
+            alert('user email id already exists')
+          }
           
+          console.log('hello from error')
         }
-      }
+
+        }
+          
       // function myfunc()=>{
       //   location.re
       // }

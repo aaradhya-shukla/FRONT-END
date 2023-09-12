@@ -49,6 +49,11 @@
                       <a href="#!" class="text-white"><i class="fa fa-twitter fa-lg mx-4 px-2"></i></a>
                       <a href="#!" class="text-white"><i class="fa fa-google fa-lg"></i></a>
                     </div>
+
+                    <div>
+                      <p class="mb-0">Don't have an account? <a href="./SignUp.html" class="text-white-50 fw-bold">Sign Up</a>
+                      </p>
+                    </div>
       
                   </div>
       
@@ -61,6 +66,31 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
     <script>
+      const form = document.getElementById('my-form');
+      form.addEventListener('submit',login);
+
+      async function login(e){
+        e.preventDefault()
+        try{
+          let email = document.getElementById('email').value;
+          let password = document.getElementById('password').value;
+          let userObj = {
+            email:email,
+            password:password
+          }
+          const result = await axios.post('http://localhost:3000/user/login',userObj);
+          form.reset()
+          console.log(result)
+
+        }
+        catch(err){
+          if(err.response.data.msg=='user not found' || err.response.data.msg=='wrong password'){
+            alert(err.response.data.msg);
+          }
+          console.log(err.response.data)
+        }
+      }
+
     </script>
     
 </body>

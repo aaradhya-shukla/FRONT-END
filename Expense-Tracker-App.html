@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous"> 
+</head>
+<body style="background-color: #c4fff2;">
+    <div class="container" style="background-color: rgba(196, 248, 255, 0.726);">
+        <h1 class="card-header">Expense Manager</h1>
+        <form class='form-control' id="my-form">
+        <input type="text" placeholder="User Name" id="name" class="form-control-sm"><br>
+        <br>
+        <input type="number" placeholder="Expenditure" id="Expenditure" class="form-control-sm"><br>
+        <br>
+        <input type="text" placeholder="Description" id="Description" class="form-control-sm"><br>
+        <br>
+        <select id="my-form-select" name="select" class="form-control-sm">
+            <option value="" disabled selected hidden>Choose Category</option>
+            <option value="Fuel">Fuel</option>
+            <option value="Movies">Movies</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Food">Food</option>
+        </select>
+        <hr>
+        <input type="submit" value="Save" class="form-control-sm">
+    </form>
+    <ul id="list" class="list-group" style="list-style: circle"></ul>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <script>
+        let ul = document.getElementById('list');
+        let form = document.getElementById('my-form');
+        form.addEventListener('submit',addExpense);
+        window.addEventListener('DOMContentLoaded',async ()=>{
+            try{
+                const result=await axios.get("http://localhost:3000/user/get-expense")
+                const expenses=result.data.expenses;
+                if(expenses.length>0){
+                    show(expenses);
+                }
+                
+            }
+            catch(err){
+                console.log(err)
+            }
+        })
+
+        async function addExpense(e){
+            e.preventDefault()
+            let name = document.getElementById('name').value;
+            let Expenditures = document.getElementById('Expenditure').value;
+            let Descriptions = document.getElementById('Description').value;
+            let Categorys = document.getElementById('my-form-select').value;
+            let expObj={
+                name:name,
+                Expenditure:Expenditures,
+                Description:Descriptions,
+                Category:Categorys
+            }
+            try{
+                form.reset();
+                const result = await axios.post("http://localhost:3000/user/add-expense",expObj);
+                const expense = result.data.expense;
+                console.log("yella",result);
+                show([result.data.expense]);
+            }
+            catch(err){
+                console.log(err);
+            }
+        }
+
+        async function delt(e){
+            const id = e.target.id;
+            try{
+                const result = await axios.get(`http://localhost:3000/user/delete-expense/${id}`)
+                form.reset();
+                let li = document.getElementById(id).parentNode;
+                ul.removeChild(li);
+            }
+            catch(err){
+                console.log(err);
+            }
+        }
+
+        async function editt(e){
+            const id = e.target.id;
+            try{
+                const result = await axios.get(`http://localhost:3000/user/edit-expense/${id}`)
+                const expense = result.data.expense;
+                form.reset();
+                let li = document.getElementById(id).parentNode;
+                ul.removeChild(li);
+                console.log(expense)
+                document.getElementById('name').value=expense.UserName;
+                document.getElementById('Expenditure').value=expense.Expenditure;
+                document.getElementById('Description').value=expense.Description;
+                document.getElementById('my-form-select').value=expense.Category;
+            }
+            catch(err){
+                console.log(err);
+            }
+        }
+
+        function show(expenses){
+            if (expenses){
+                for(i of expenses){
+                    let Expenditure = i.Expenditure;
+                    let Description = i.Description;
+                    let Category    = i.Category;
+                    let li = document.createElement('li');
+                    li.setAttribute("class","list-group-item");
+                    li.textContent=`Rs ${Expenditure}-${Description}-${Category}`;
+                    let del = document.createElement('button');
+                    let edit = document.createElement('button');
+                    del.textContent="DELETE";
+                    edit.textContent="EDIT";
+                    del.setAttribute("id",`${i.id}`)
+                    edit.setAttribute("id",`${i.id}`)
+                    del.addEventListener('click',delt);
+                    edit.addEventListener('click',editt);
+                    li.appendChild(del)
+                    li.appendChild(edit);
+                    ul.appendChild(li);
+
+                }
+            }
+        }
+
+
+
+
+
+
+
+
+    </script>
+</body>
+</html>

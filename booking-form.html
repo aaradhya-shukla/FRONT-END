@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a callt</title>
+</head>
+<body id="my-body">
+    <h1>BOOKINIG APPOINTMENT APP</h1>
+    <form id="my-form">
+        <label for="name">Name</label>
+        <input type="text" name="name" id="name">
+        <label for="phone">Phone No.</label>
+        <input type="number" name="phone" id="phone">
+        <label for="email">Email</label>
+        <input type="email" name="email" id="email">
+        <input type="submit" id="b" value="Book">
+
+
+    </form>
+    <ul style="list-style: circle" id="list"></ul>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
+    <script>
+        let form = document.getElementById("my-form");
+        let ul = document.getElementById("list")
+        form.addEventListener("submit",book)
+        
+        window.addEventListener("DOMContentLoaded", ()=>{
+            axios.get("http://localhost:3000/user/get-users").then((res)=>{
+                let users=res.data.allusers;
+                showUser(users)
+            }).catch(err=>console.log(err))
+        })
+        
+        function showUser(users){
+            if(users){
+                for (let i of users){
+                    let li=document.createElement('li')
+                    let name= i.name
+                    let email=i.email
+                    let phone=i.phone
+                    li.textContent=`${name} - ${phone} - ${email}`;
+                    let del= document.createElement('button');
+                    let edit = document.createElement('button');
+                    del.setAttribute('id',`${i.id}`);
+                    edit.setAttribute('id',`${i.id}`);
+                    del.textContent='DELETE'
+                    edit.textContent='EDIT'
+                    del.addEventListener('click',delt);
+                    edit.addEventListener('click',editt);
+                    li.appendChild(del);
+                    li.appendChild(edit);
+                    ul.appendChild(li)
+                }
+            }
+        }
+
+        function delt(e){
+            let id = e.target.id;
+        
+            axios.get(`http://localhost:3000/user/delete-user/${id}`).then((res)=>{
+                form.reset();
+                let li=document.getElementById(id).parentNode;
+                ul.removeChild(li);
+            }).catch(err=>console.log(err))
+        }
+
+        function editt(e){
+            let id = e.target.id;
+            axios.get(`http://localhost:3000/user/edit-user/${id}`).then((res)=>{
+                form.reset();
+                let user=res.data.user;
+                console.log("this is from edit:",user.name)
+                let li=document.getElementById(id).parentNode;
+                ul.removeChild(li);
+                document.getElementById('name').value=user.name;
+                document.getElementById('email').value=user.email;
+                document.getElementById('phone').value=user.phone
+            }).catch(err=>console.log(err))
+        }
+        
+        function book(e){
+            e.preventDefault()
+            let name= document.getElementById("name").value
+            let phone= document.getElementById("phone").value
+            let email= document.getElementById("email").value
+            phone=phone.toString()
+            let userObj={
+            name:name,
+            phone:phone,
+            email:email
+            
+        }
+            form.reset();
+            axios.post('http://localhost:3000/user/add-user',userObj).then((res)=>{
+                
+                showUser([res.data.newUser])
+            }).catch(err=>console.log(err))
+        }
+        
+    </script>
+</body>
+</html>

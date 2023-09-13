@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Manager</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-4bw+/aepP/YC94hEpVNVgiZdgIC5+VKNBQNGCHeKRQN+PtmoHDEXuppvnDJzQIu9" crossorigin="anonymous">     
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <section  class="vh-100" style="background-color: #9A616D;">
+        <header class="d-flex justify-content-center align-items-center h-40">
+            <h2 style="font-weight: bold; font-family: sans-serif; font-style: italic; color: aliceblue;">Expense Tracker</h2>
+        </header>
+        <hr class="fa-long-arrow-right">
+        <div class="container py-5 h-100">
+            <div class="row d-flex justify-content-center align-items-center h-80">
+                <div class="col-md-6">
+                    <div class="card bg-grey"style="border-radius: 1rem">
+                        <div class="card-header">
+                            <h4 class="card-title">Add Expense</h4>
+                        </div>
+                        <form class="" id="my-form">
+                            <input type="number" id="expense" placeholder="Enter Expense" class="form-control"><br>
+                            <input type="text" id="description" placeholder="Enter description" class="form-control"><br>
+                            <select id="category" class="form-control">
+                                <option value="" disabled selected hidden>Choose Category</option>
+                                <option value="Fuel">Fuel</option>
+                                <option value="Electronics">Electronics</option>
+                                <option value="Food">Food</option>
+                                <option value="Clothing">Clothing</option>
+                                <option value="Movies">Movies</option>
+                            </select>
+                            <input type="submit" id="btn" value="ADD" class="form-control">
+                        </form>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card bg-black text-white" style="border-radius: 1rem">
+                        <div class="card-header">
+                            <h4 class="card-title">Current Expenses</h4>
+                            <ul id="list">
+                                <h6 id="no" style="font-style: italic;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif">-No expenditure yet</h6>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+
+
+
+
+
+
+
+
+
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    <script>
+        const form = document.getElementById('my-form');
+        const row = document.getElementById('my-row');
+        form.addEventListener('submit',addExpense);
+        const ul = document.getElementById('list')
+        
+        window.addEventListener('DOMContentLoaded', async ()=>{
+            const h = document.createElement('h6');
+            h.setAttribute("style","font-style: italic;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif")
+            h.setAttribute('id','no');
+            try{
+                const searchParams= new URLSearchParams(window.location.search);
+                const id = searchParams.get('id');
+                const result = await axios.get(`http://localhost:3000/expense/get-expense?id=${id}`);
+                console.log(result.data.expenses)
+                show(result.data.expenses);
+            }
+            catch(err){
+                console.log(err);
+            }
+        })
+        async function addExpense(e){
+            e.preventDefault();
+            try{
+                let expense = document.getElementById('expense').value;
+                let description = document.getElementById('description').value;
+                let category = document.getElementById('category').value;
+                let expObj= {
+                    expense:expense,
+                    description:description,
+                    category:category
+                }
+                const searchParams= new URLSearchParams(window.location.search);
+                const id = searchParams.get('id');
+                console.log(id)
+                const result = await axios.post(`http://localhost:3000/expense/add-expense?id=${id}`,expObj);
+                show([result.data.expenses])
+            }
+            catch(err){
+                console.log(err)
+            }
+        }
+
+        function show(expenses){
+            if (expenses){
+                console.log('here')
+                ul.removeChild(document.getElementById('no'))
+                for (let i of expenses){
+                    let {id,expense,description,category} = i
+                    let li = document.createElement('li');
+                    li.textContent = `Rs${expense}-${description}-${category} `;
+                    let del = document.createElement('button')
+                    del.setAttribute('id',`${id}`);
+                    del.textContent = 'Delete';
+                    del.addEventListener('click',delt);
+                    li.appendChild(del);
+                    ul.appendChild(li)   
+                    
+                }
+            }
+        }
+
+        async function delt(e){
+            e.preventDefault();
+            try{
+                const id = e.target.id;
+                const result = await axios.get(`http://localhost:3000/expense/delete-expense/${id}`)
+                ul.removeChild(e.target.parentNode);
+            }
+            catch(err){
+                console.log(err);
+            }
+        }
+    </script>
+</body>
+</html>

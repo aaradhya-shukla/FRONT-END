@@ -80,7 +80,12 @@
           }
           const result = await axios.post('http://localhost:3000/user/login',userObj);
           form.reset()
-          console.log(result)
+          alert('User logged in Successfully');
+          if (result.status==200){
+            const id = result.data.user.id
+            sessionStorage.setItem('id',`${id}`);
+            location.replace(`./expense.html?id=${id}`)
+          }
 
         }
         catch(err){

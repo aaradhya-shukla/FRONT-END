@@ -68,16 +68,15 @@
         const row = document.getElementById('my-row');
         form.addEventListener('submit',addExpense);
         const ul = document.getElementById('list')
+        const token = localStorage.getItem('token');
+        let userObj="";
         
         window.addEventListener('DOMContentLoaded', async ()=>{
-            const h = document.createElement('h6');
-            h.setAttribute("style","font-style: italic;font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif")
-            h.setAttribute('id','no');
             try{
-                const searchParams= new URLSearchParams(window.location.search);
-                const id = searchParams.get('id');
-                const result = await axios.get(`http://localhost:3000/expense/get-expense?id=${id}`);
+                console.log(token)
+                const result = await axios.get('http://localhost:3000/expense/get-expense',{headers:{'authurization':token}});
                 console.log(result.data.expenses)
+                userObj=result.data.user;
                 show(result.data.expenses);
             }
             catch(err){
@@ -98,7 +97,7 @@
                 const searchParams= new URLSearchParams(window.location.search);
                 const id = searchParams.get('id');
                 console.log(id)
-                const result = await axios.post(`http://localhost:3000/expense/add-expense?id=${id}`,expObj);
+                const result = await axios.post('http://localhost:3000/expense/add-expense',expObj,{headers:{authurization:token}});
                 show([result.data.expenses])
             }
             catch(err){
@@ -107,9 +106,9 @@
         }
 
         function show(expenses){
-            if (expenses){
+            if (expenses.length>0){
                 console.log('here')
-                ul.removeChild(document.getElementById('no'))
+                document.getElementById('no').style.display="none"
                 for (let i of expenses){
                     let {id,expense,description,category} = i
                     let li = document.createElement('li');

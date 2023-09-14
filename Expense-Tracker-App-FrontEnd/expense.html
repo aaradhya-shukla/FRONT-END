@@ -10,7 +10,7 @@
 <body>
     <section  class="vh-100" style="background-color: #9A616D;">
         <header class="d-flex justify-content-center align-items-center h-40">
-            <h2 style="font-weight: bold; font-family: sans-serif; font-style: italic; color: aliceblue;">Expense Tracker</h2>
+            <h2 id="heading" style="font-weight: bold; font-family: sans-serif; font-style: italic; color: aliceblue;">Expense Tracker</h2>
         </header>
         <hr class="fa-long-arrow-right">
         <div class="container py-5 h-100">
@@ -46,38 +46,34 @@
                     </div>
                 </div>
             </div>
+            <div id ="prem-div" class="d-flex justify-content-center text-center mt-lg-4 pt-lg-4">
+                <button id="Premium" type="button" class="text-white" style="background-color: grey; height: 2rem;">Buy Premium <i class="fa fa-money"></i></button>
+                <p> </p>
+                <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+                <button id = "logout" type="button" class="text-white"  style="background-color: grey; height: 2rem;">Log Out <i class="fa fa-power-off"></i></button>
+            </div>
         </div>
     </section>
-    
-
-
-
-
-
-
-
-
-
-
-
-
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/js/bootstrap.bundle.min.js" integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm" crossorigin="anonymous"></script>
+    
     <script>
         const form = document.getElementById('my-form');
         const row = document.getElementById('my-row');
         form.addEventListener('submit',addExpense);
         const ul = document.getElementById('list')
         const token = localStorage.getItem('token');
+        const Premium = document.getElementById('Premium');
+        Premium.addEventListener('click',buyPremium);
         let userObj="";
         
         window.addEventListener('DOMContentLoaded', async ()=>{
             try{
-                console.log(token)
+                // console.log(token)
                 const result = await axios.get('http://localhost:3000/expense/get-expense',{headers:{'authurization':token}});
-                console.log(result.data.expenses)
+                // console.log(result.data.expenses)
                 userObj=result.data.user;
-                show(result.data.expenses);
+                show(result.data.expenses,userObj);
             }
             catch(err){
                 console.log(err);
@@ -95,19 +91,24 @@
                     category:category
                 }
                 const searchParams= new URLSearchParams(window.location.search);
-                const id = searchParams.get('id');
-                console.log(id)
+                // const id = searchParams.get('id');
+                // console.log(id)
                 const result = await axios.post('http://localhost:3000/expense/add-expense',expObj,{headers:{authurization:token}});
-                show([result.data.expenses])
+                show([result.data.expenses],null)
             }
             catch(err){
                 console.log(err)
             }
         }
 
-        function show(expenses){
+        function show(expenses,user){
             if (expenses.length>0){
                 console.log('here')
+                if (user && user.isPremium){
+                    document.getElementById('prem-div').removeChild(Premium);
+                    console.log("here")
+                    document.getElementById('heading').textContent='Expense Tracker - Premium';
+                }
                 document.getElementById('no').style.display="none"
                 for (let i of expenses){
                     let {id,expense,description,category} = i
@@ -130,6 +131,68 @@
                 const id = e.target.id;
                 const result = await axios.get(`http://localhost:3000/expense/delete-expense/${id}`)
                 ul.removeChild(e.target.parentNode);
+            }
+            catch(err){
+                console.log(err);
+            }
+        }
+
+        async function buyPremium(e){
+            
+            try{
+                const result = await axios.get('http://localhost:3000/purchase/purchase-premium',{headers:{
+                    authurization:token
+                }})
+                console.log("prem:",result);
+                var options={
+                    'key':result.data.key_id,
+                    'order_id':result.data.order.id,
+                    'handler': async (response)=>{
+                        try{
+                            console.log(response)
+                            const res = await axios.post('http://localhost:3000/purchase/updatePurchaseStatus',{
+                                orderId:options.order_id,
+                                paymentId:response.razorpay_payment_id,
+                                status:'SUCCESSFUL'
+                            },{
+                                headers:{
+                                    authurization:token
+                                }
+                            })
+                            if(res.status==201){
+                                alert('You are a premium user now!')
+                                document.getElementById('prem-div').removeChild(Premium);
+                                console.log("here")
+                                document.getElementById('heading').textContent='Expense Tracker - Premium';
+                            }
+                            
+                        }
+                        catch(err){
+                            console.log(err)
+                        }
+                    }
+                }
+                var rzp = new Razorpay(options);
+                rzp.open();
+                e.preventDefault();
+                rzp.on('payment.failed', async function (response){
+                    console.log(response)
+                    alert('payment has failed')
+                    try{
+                        const res = await axios.post('http://localhost:3000/purchase/updatePurchaseStatus',{
+                                orderId:options.order_id,
+                                purchaseId:response.razorpay_payment_id,
+                                status:'FAILED'
+                            },{
+                                headers:{
+                                    authurization:token
+                                }
+                            })
+                    }
+                    catch(err){
+                        console.log(err)
+                    }
+                })
             }
             catch(err){
                 console.log(err);

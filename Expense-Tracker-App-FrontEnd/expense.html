@@ -50,7 +50,7 @@
                 <button id="Premium" type="button" class="text-white" style="background-color: grey; height: 2rem;">Buy Premium <i class="fa fa-money"></i></button>
                 <p> </p>
                 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-                <button id = "logout" type="button" class="text-white"  style="background-color: grey; height: 2rem;">Log Out <i class="fa fa-power-off"></i></button>
+                <button onclick="window.location.replace('./login.html')"  id = "logout" type="button" class="text-white"  style="background-color: grey; height: 2rem;">Log Out <i class="fa fa-power-off"></i></button>
             </div>
         </div>
     </section>
@@ -93,6 +93,7 @@
                 const searchParams= new URLSearchParams(window.location.search);
                 // const id = searchParams.get('id');
                 // console.log(id)
+                form.reset();
                 const result = await axios.post('http://localhost:3000/expense/add-expense',expObj,{headers:{authurization:token}});
                 show([result.data.expenses],null)
             }
@@ -108,6 +109,13 @@
                     document.getElementById('prem-div').removeChild(Premium);
                     console.log("here")
                     document.getElementById('heading').textContent='Expense Tracker - Premium';
+                    let button = document.createElement('button')
+                    button.setAttribute('type','button');
+                    button.textContent='Premium';
+                    button.setAttribute('onclick',"window.location.replace('./leaderBoard.html')")
+                    button.setAttribute('style','background-color: black; height: 2rem; font-style: italic;color: gold;')
+                    document.getElementById('prem-div').appendChild(button)
+                  }
                 }
                 document.getElementById('no').style.display="none"
                 for (let i of expenses){
@@ -123,7 +131,7 @@
                     
                 }
             }
-        }
+        
 
         async function delt(e){
             e.preventDefault();
@@ -164,6 +172,12 @@
                                 document.getElementById('prem-div').removeChild(Premium);
                                 console.log("here")
                                 document.getElementById('heading').textContent='Expense Tracker - Premium';
+                                let button = document.createElement('button')
+                                button.setAttribute('type','button');
+                                button.textContent='Premium';
+                                button.setAttribute('onclick',"window.location.replace('./leaderBoard.html')")
+                                button.setAttribute('style','background-color: black; height: 2rem; font-style: italic;color: gold;')
+                                document.getElementById('prem-div').appendChild(button)
                             }
                             
                         }

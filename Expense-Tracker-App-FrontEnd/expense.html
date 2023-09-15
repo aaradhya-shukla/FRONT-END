@@ -137,7 +137,9 @@
             e.preventDefault();
             try{
                 const id = e.target.id;
-                const result = await axios.get(`http://localhost:3000/expense/delete-expense/${id}`)
+                const result = await axios.get(`http://localhost:3000/expense/delete-expense/${id}`,{headers:{
+                    authurization:token
+                }})
                 ul.removeChild(e.target.parentNode);
             }
             catch(err){

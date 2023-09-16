@@ -16,7 +16,61 @@
 
         /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
         background: linear-gradient(to right, rgb(17, 203, 187), rgb(205, 252, 37))
+
         }
+        /* The popup form - hidden by default */
+.form-popup {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  right: 15px;
+  border: 3px solid #f1f1f1;
+  z-index: 9;
+}
+
+/* Add styles to the form container */
+.form-container {
+  max-width: 300px;
+  padding: 10px;
+  background-color: white;
+}
+
+/* Full-width input fields */
+.form-container input[type=text], .form-container input[type=password] {
+  width: 100%;
+  padding: 15px;
+  margin: 5px 0 22px 0;
+  border: none;
+  background: #f1f1f1;
+}
+
+/* When the inputs get focus, do something */
+.form-container input[type=text]:focus, .form-container input[type=password]:focus {
+  background-color: #ddd;
+  outline: none;
+}
+
+/* Set a style for the submit/login button */
+.form-container .btn {
+  background-color: #04AA6D;
+  color: white;
+  padding: 16px 20px;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  margin-bottom:10px;
+  opacity: 0.8;
+}
+
+/* Add a red background color to the cancel button */
+.form-container .cancel {
+  background-color: red;
+}
+
+/* Add some hover effects to buttons */
+.form-container .btn:hover, .open-button:hover {
+  opacity: 1;
+}
     </style>
         
 </head>
@@ -54,13 +108,22 @@
                       <p class="mb-0">Don't have an account? <a href="./SignUp.html" class="text-white-50 fw-bold">Sign Up</a>
                       </p>
                     </div>
-      
+                    <p class="mb-0">Forgot Password? <a id="open-form" onclick="openForm();return false"  href="" class="text-white-50 fw-bold">Click Me!</a>
+                    </p>
                   </div>
       
                 </div>
               </div>
             </div>
           </div>
+        </div>
+        <div class="form-popup" id="myForm">
+          <form class="form-container">
+            <h4>Request for password change</h4>
+            <input type="text" placeholder="Enter Email" name="email" required id="email-reset">  
+            <button type="button" class="btn" id="password-btn">Send request mail</button>
+            <button type="button" class="btn cancel" onclick="closeForm()">Close</button>
+          </form>
         </div>
       </section>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
@@ -96,6 +159,32 @@
         }
       }
 
+      function openForm() {
+        document.getElementById("myForm").style.display = "block";
+        createBtn();
+      }
+
+      function closeForm() {
+        document.getElementById("myForm").style.display = "none";
+      }
+
+      function createBtn(){
+        const reset = document.getElementById('password-btn');
+        reset.addEventListener('click',passReset);
+      }
+      
+      async function passReset(e){
+        console.log('heree')
+        e.preventDefault()
+        try{
+          const res = await axios.post('http://localhost:3000/password/forgotpassword',{
+            email:document.getElementById('email-reset').value
+          })
+        }
+        catch(err){
+          console.log(err)
+        }
+      }
     </script>
     
 </body>

@@ -62,11 +62,21 @@
             </div>
         </div>
     </section>
-    <div class="container">
+    <div class="container" style="background-color: hsl(348, 22%, 73%);">
         <div id= "pagination" class="d-flex justify-content-center text-center mt-lg-4 pt-lg-4">
             <button id="prev" type="button"  style="display: none;">prev</button>
             <button id="curr" type="button" value="1"></button>
             <button id="next" type="button" style="display: none;">next</button>
+        </div>
+        <div class="d-flex justify-content-center text-center mt-lg-4 pt-lg-4">
+            <label for="rows">Rows Per Page</label>
+            <select name="rows" id="rows" oninput="updateRows()">
+                <option value="5">5</option>
+                <option value="10">10</option>
+                <option value="15">15</option>
+                <option value="20">20</option>
+                <option value="25">25</option>
+            </select>
         </div>
     </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.5.0/axios.min.js"></script>
@@ -88,7 +98,11 @@
         const prev = document.getElementById('prev')
         const next = document.getElementById('next');
         const curr = document.getElementById('curr');
+        // const selectDropdown= document.querySelector('select');
+        // selectDropdown.addEventListener('change',updateRows);
+        let rows = document.getElementById('rows').value
         curr.textContent=`${currentPage}`;
+        localStorage.setItem('rows',`${rows}`)
         prev.addEventListener('click',()=>{
             if (currentPage>1){
                 currentPage-=1
@@ -135,7 +149,8 @@
         
        async function getExpense(page){
         try{
-            const result = await axios.get(`http://localhost:3000/expense/get-expense?page=${page}`,{headers:{'authurization':token}});
+            let rows = localStorage.getItem('rows')
+            const result = await axios.post(`http://localhost:3000/expense/get-expense?page=${page}`,{rows:rows},{headers:{'authurization':token}});
             let {expenses,user,currentPage,haspreviousPage,hasnextPage}=result.data;
             helper(expenses,user,currentPage,haspreviousPage,hasnextPage)
         }
@@ -146,7 +161,7 @@
         }
         window.addEventListener('DOMContentLoaded', async ()=>{
             try{
-            const result = await axios.get(`http://localhost:3000/expense/get-expense?page=1`,{headers:{'authurization':token}});
+            const result = await axios.post(`http://localhost:3000/expense/get-expense?page=1`,{rows:rows},{headers:{'authurization':token}});
             let {expenses,user,currentPage,haspreviousPage,hasnextPage}=result.data;
             postPremium(user.isPremium)
             helper(expenses,user,currentPage,haspreviousPage,hasnextPage)
@@ -156,6 +171,18 @@
         }
             
         })
+
+        function updateRows(){
+            rows=document.getElementById('rows').value
+            localStorage.setItem('rows',`${rows}`)
+            while(ul.hasChildNodes()){
+                ul.removeChild(ul.firstChild)
+                }
+            let h6=document.createElement('h6');
+            h6.setAttribute('id','no');
+            ul.appendChild(h6)
+            getExpense(currentPage)
+        }
         async function addExpense(e){
             e.preventDefault();
             try{
